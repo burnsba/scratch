@@ -26,6 +26,7 @@ function load() {
 }
 function make_maze() {
     a=document.getElementById('textb').innerHTML;
+    // characters for '/' and '\', plus a random between 0 and 1, will truncate to integer
     a+=String.fromCharCode(9585.5+Math.random());
     document.getElementById('textb').innerHTML=a;
 }
