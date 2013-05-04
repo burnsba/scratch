@@ -1,7 +1,31 @@
+/*The MIT License (MIT)
+
+Copyright (c) 2013 ben burns
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
 #include <stdio.h>
 #include <string.h>
 
-#define IEEE_BIAS    		1023
+#define IEEE_BIAS			1023
 
 #define IEEE_SIGN_BIT_MASK		0x8000000000000000ULL
 #define IEEE_EXPONENT_BIT_MASK		0x7ff0000000000000ULL
@@ -17,7 +41,8 @@
 // IEEE Format: S Ex11 Mx52
 // EPFP Format: S Mx39 Ex8
 
-// use is in main, could use some improvement though.
+// tried to avoid putting the 48 bit float into a regular data structure, 
+// but sometimes I couldn't avoid it
 
 struct EPFP 
 {
@@ -25,6 +50,13 @@ struct EPFP
 	unsigned int exponent;
 	unsigned long long mantissa;
 };
+
+void printf_EPFP(struct EPFP e)
+{
+	printf("sign: %x\n", e.sign);
+	printf("exponent: %x\n", e.exponent);
+	printf("mantissa: %llx\n", e.mantissa);
+}
 
 unsigned int get_IEEE_exponent(double d)
 {
@@ -36,6 +68,7 @@ unsigned long long get_IEEE_mantissa(double d)
 	return (*(unsigned long long *)&d & IEEE_MANTISSA_BIT_MASK);
 }
 
+// returns as single bit, 0 or 1
 unsigned int get_IEEE_sign(double d)
 {
 	return (*(unsigned long long *)&d & IEEE_SIGN_BIT_MASK) >> IEEE_SIGN_BIT_POSITION;
@@ -56,13 +89,8 @@ unsigned long long IEEE_mantissa_to_EPFP_mantissa(unsigned long long d)
 	return d >> MANTISSA_POSITION_DIFFERENCE;
 }
 
-void printf_EPFP(struct EPFP e)
-{
-	printf("sign: %x\n", e.sign);
-	printf("exponent: %x\n", e.exponent);
-	printf("mantissa: %llx\n", e.mantissa);
-}
-
+// assumes the character array is long enough to hold a double
+// Values are assumed to be hex (not ascii)
 double hex_char_to_double(unsigned char *c)
 {
 	double d = 0.0;
@@ -83,6 +111,8 @@ double hex_char_to_double(unsigned char *c)
 	return d;
 }
 
+// assumes the character array is long enough to hold a 48 bit float.
+// Values are assumed to be hex (not ascii)
 struct EPFP hex_char_to_EPFP(unsigned char *c)
 {
 	struct EPFP e;
@@ -92,6 +122,7 @@ struct EPFP hex_char_to_EPFP(unsigned char *c)
 	e.exponent = c[5];
 	
 	e.mantissa = 
+		// ignore the first bit, which is sign
 		((unsigned long long)(c[1] & 0x7f) << 32) |
 		((c[1] & 0xff) << 24) |
 		((c[2] & 0xff) << 16) |
@@ -102,11 +133,13 @@ struct EPFP hex_char_to_EPFP(unsigned char *c)
 	return e;
 }
 
+// prints the ASCII representation into dest
 void double_to_char(double d, char* dest)
 {
 	sprintf(dest, "%llx", *(unsigned long long *)&d);
 }
 
+// prints the ASCII representation into dest
 void EPFP_to_char(struct EPFP e, char* dest)
 {
 	unsigned long long sign_mantissa = 0;
