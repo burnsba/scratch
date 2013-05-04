@@ -213,5 +213,21 @@ int main()
 	double back = EPFPtoIEEE(e);
 	printf("%f\n", back);
 	
+	// output:
+	/*
+	~/code/ieee$ ./a.out 
+	character array: 
+	4091eb851eb851f
+	char to double: 40091eb851eb851f
+	double to char[]: 
+	40091eb851eb851f
+	double to epfp:
+	sign: 0
+	exponent: 81
+	mantissa: 48f5c28f5c
+	epfp to double: 3.140000
+	*/
+
+	
 	return 0;
 }
