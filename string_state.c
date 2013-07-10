@@ -180,28 +180,21 @@ int main(int argc, char **argv)
         // next character
         c = fgetc(handle);
 
-
         switch (c)
         {
             // looking for the string ";S;"
             case ';':
                 if (state == 0) /* first semicolon */
-                {
                     state++;
-                }
                 else if (state == 2) /* second semicolon */
-                {
                     state++;
-                }
                 else
                     state = 0;
             break;
             
             case 'S':
                 if (state == 1) /* after semicolon is an 'S' */
-                {
                     state++;
-                }
                 else
                     state = 0;
             break;
@@ -211,6 +204,7 @@ int main(int argc, char **argv)
                 // found ";S;" start saving the name field, one character at a time
                 if (state == 3)
                 {
+                    // start saving the job id
                     if (isnumeric(c))
                     {
                         // safety check ...
@@ -220,6 +214,7 @@ int main(int argc, char **argv)
                             job_id_name_index++;
                         }
                     }
+                    // this is either not a job id, or the end of the number string
                     else
                         state = 0;
                 }
@@ -228,22 +223,22 @@ int main(int argc, char **argv)
                 // state can change above.
                 if (state != 3)
                 {
-                    // check to see if the latest key has been inserted
-                    // or it's still reset since last time.
+                    // check to see if the current key has been set.
+                    // If there is a current key, save it to the hash.
                     if (current_key[0] != 0)
                     {
                         matches_found++;
-                        increment_count(current_key);
+                        increment_count(current_key); // update hash
                         
                         state = 0;
                         job_id_name_index = 0;
                         memset(current_key, 0, 10);
                     }
+                    // no reason to memset every loop iteration
                     else 
                     {
                         state = 0;
                         job_id_name_index = 0;
-                        memset(current_key, 0, 10);
                     }
                 }
         }
