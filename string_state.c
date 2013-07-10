@@ -51,40 +51,40 @@ THE SOFTWARE.
 // Sample output:
 //    
 //    
-//		C:\code>main.exe data_large.txt
-//		(before) there are 0 items in the hash
-//		(after) there are 322909 items in the hash
-//		hash key='000056', value(count)='1'
-//		hash key='000060', value(count)='2'
-//		hash key='000068', value(count)='3'
-//		hash key='000080', value(count)='2'
-//		hash key='000084', value(count)='1'
-//		hash key='000086', value(count)='1'
-//		hash key='000090', value(count)='2'
-//		hash key='000092', value(count)='2'
-//		hash key='000096', value(count)='2'
-//		hash key='000098', value(count)='4'
-//		hash key='000100', value(count)='1'
-//		hash key='000052', value(count)='1'
-//		hash key='000104', value(count)='3'
-//		hash key='000108', value(count)='1'
-//		hash key='000110', value(count)='3'
-//		hash key='000074', value(count)='1'
-//		hash key='000106', value(count)='2'
-//		hash key='000114', value(count)='1'
-//		hash key='000065', value(count)='1'
-//		hash key='000075', value(count)='1'
-//		hash key='000085', value(count)='1'
-//		hash key='000105', value(count)='1'
-//		hash key='000115', value(count)='2'
-//		hash key='000125', value(count)='1'
-//		hash key='000145', value(count)='2'
-//		hash key='000152', value(count)='2'
-//		hash key='000050', value(count)='21'
-//		hash key='000120', value(count)='1'
-//		hash key='000134', value(count)='2'
-//		hash key='000162', value(count)='2'
-//		found 333897 matches, 10988 unique items
+//        C:\code>main.exe data_large.txt
+//        (before) there are 0 items in the hash
+//        (after) there are 322909 items in the hash
+//        hash key='000056', value(count)='1'
+//        hash key='000060', value(count)='2'
+//        hash key='000068', value(count)='3'
+//        hash key='000080', value(count)='2'
+//        hash key='000084', value(count)='1'
+//        hash key='000086', value(count)='1'
+//        hash key='000090', value(count)='2'
+//        hash key='000092', value(count)='2'
+//        hash key='000096', value(count)='2'
+//        hash key='000098', value(count)='4'
+//        hash key='000100', value(count)='1'
+//        hash key='000052', value(count)='1'
+//        hash key='000104', value(count)='3'
+//        hash key='000108', value(count)='1'
+//        hash key='000110', value(count)='3'
+//        hash key='000074', value(count)='1'
+//        hash key='000106', value(count)='2'
+//        hash key='000114', value(count)='1'
+//        hash key='000065', value(count)='1'
+//        hash key='000075', value(count)='1'
+//        hash key='000085', value(count)='1'
+//        hash key='000105', value(count)='1'
+//        hash key='000115', value(count)='2'
+//        hash key='000125', value(count)='1'
+//        hash key='000145', value(count)='2'
+//        hash key='000152', value(count)='2'
+//        hash key='000050', value(count)='21'
+//        hash key='000120', value(count)='1'
+//        hash key='000134', value(count)='2'
+//        hash key='000162', value(count)='2'
+//        found 333897 matches, 10988 unique items
 //
 // Ben Burns
 // July 10, 2013
@@ -114,9 +114,9 @@ HASH_OBJECT *head = NULL;    /* important! initialize to NULL */
 // well, this will work for ascii. Hopefully there's no unicode or anything ...
 int isnumeric(unsigned char c)
 {
-	if (c < '0') 
-		return 0;
-	return !(c > '9');
+    if (c < '0') 
+        return 0;
+    return !(c > '9');
 }
 
 // Will search the hash table for a given key.
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         return 0;
     }
     
-	memset(current_key, 0, 10);
+    memset(current_key, 0, 10);
     printf("(before) there are %d items in the hash\n", HASH_COUNT(head));
     
     do
@@ -193,49 +193,49 @@ int main(int argc, char **argv)
                 {
                     state++;
                 }
-				else
-					state = 0;
+                else
+                    state = 0;
             break;
-			
+            
             case 'S':
                 if (state == 1) /* after semicolon is an 'S' */
                 {
                     state++;
                 }
-				else
-					state = 0;
+                else
+                    state = 0;
             break;
-			
+            
             default:
-			
-				// found ";S;" start saving the name field, one character at a time
+            
+                // found ";S;" start saving the name field, one character at a time
                 if (state == 3)
                 {
-					if (isnumeric(c))
-					{
-						// safety check ...
-						if (job_id_name_index < MAX_KEY_NAME_LEN)
-						{
-							current_key[job_id_name_index] = c;
-							job_id_name_index++;
-						}
-					}
-					else
-						state = 0;
+                    if (isnumeric(c))
+                    {
+                        // safety check ...
+                        if (job_id_name_index < MAX_KEY_NAME_LEN)
+                        {
+                            current_key[job_id_name_index] = c;
+                            job_id_name_index++;
+                        }
+                    }
+                    else
+                        state = 0;
                 }
-			
+            
                 // otherwise, reset state machine.
-				// state can change above.
+                // state can change above.
                 if (state != 3)
                 {
-					// check to see if the latest key has been inserted
-					// or it's still reset since last time.
-					if (current_key[0] != 0)
-					{
-						matches_found++;
-						increment_count(current_key);
-					}
-				
+                    // check to see if the latest key has been inserted
+                    // or it's still reset since last time.
+                    if (current_key[0] != 0)
+                    {
+                        matches_found++;
+                        increment_count(current_key);
+                    }
+                
                     state = 0;
                     job_id_name_index = 0;
                     memset(current_key, 0, 10);
