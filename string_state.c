@@ -30,64 +30,64 @@ THE SOFTWARE.
 //
 // example:
 // 
-// A file contains 20,000,000 lines of text (99.9 MB or 104,812,748 bytes) of 
+// A file contains 20,000,000 lines of text (293 MB or 307,405,822 bytes) of 
 //log output, such as the following:
 //
-//    2013-06-17:04:49:10.000;A;000050.edu.watermelon.wat0
-//    2013-06-14:01:17:27.000;A;000051.edu.pear.pea1
-//    2013-06-09:22:31:48.000;S;000052.edu.avocado.avo3
-//    2013-06-12:09:32:09.000;A;000053.edu.durian.dur2
-//    2013-06-22:14:06:59.000;F;000054.edu.boysenberry.boy0
-//    2013-06-27:05:27:16.000;F;000055.edu.melon.mel1
-//    2013-06-17:09:16:16.000;S;000056.edu.huckleberry.huc2
-//    2013-06-22:06:14:17.000;F;000057.edu.dragonfruit.dra0
-//    2013-06-12:00:12:46.000;S;000058.edu.lychee.lyc1
-//    2013-06-19:15:29:04.000;A;000059.edu.pomegranate.pom3
+//    06/06/2013 02:21:12.000;pbs_server:19705;A;000050.gua1.guava.edu;Resource.List=dmc61/1,dmc61/1,dmc50/1,ncpus=2,nodes=1,mem=1gb,lqueue=small-serial;Torque 14097
+//    03/06/2013 11:38:00.000;pbs_server:19705;A;Job;Resource.List=dmc57/1,dmc57/2,dmc50/1,ncpus=1,nodes=2,mem=2gb,lqueue=small-serial;Torque 14373
+//    18/06/2013 04:59:53.000;pbs_server:19705;F;000052.hon0.honeydew.edu;Resource.List=dmc57/2,dmc57/1,dmc52/2,ncpus=1,nodes=1,mem=1gb,lqueue=small-serial;Torque 14659
+//    19/06/2013 22:31:22.000;pbs_server:19705;F;Job;Resource.List=dmc65/1,dmc65/2,dmc50/1,ncpus=2,nodes=2,mem=2gb,lqueue=small-serial;Torque 15330
+//    28/06/2013 03:53:43.000;pbs_server:19705;F;000054.clo3.cloudberry.edu;Resource.List=dmc56/1,dmc56/1,dmc51/1,ncpus=2,nodes=1,mem=1gb,lqueue=small-serial;Torque 15412
+//    16/06/2013 02:46:52.000;pbs_server:19705;S;Job;Resource.List=dmc60/1,dmc60/1,dmc50/1,ncpus=1,nodes=1,mem=1gb,lqueue=small-serial;Torque 14129
+//    25/06/2013 18:24:13.000;pbs_server:19705;S;000056.bil1.bilberry.edu;Resource.List=dmc59/2,dmc59/2,dmc52/2,ncpus=1,nodes=2,mem=2gb,lqueue=small-serial;Torque 15741
+//    11/06/2013 14:48:28.000;pbs_server:19705;F;Job;Resource.List=dmc57/2,dmc57/1,dmc53/2,ncpus=2,nodes=1,mem=1gb,lqueue=small-serial;Torque 15975
+//    27/06/2013 04:41:47.000;pbs_server:19705;F;000058.coc2.coconut.edu;Resource.List=dmc63/1,dmc63/1,dmc52/1,ncpus=2,nodes=1,mem=1gb,lqueue=small-serial;Torque 15879
 //
 // If the string ";S;" appears on the line, the six digits immediately
 // following must be tracked. The number of times these six digits
-// appears must be counted.
+// appears must be counted. If there are no digits, ignore.
 // 
-// The code below will evaluate the entire file in about 10s.
+// The code below will evaluate the entire file in about 15s.
 // Sample output:
 //    
 //    
-//    C:\code>main.exe data_large.txt
-//    (before) there are 0 items in the hash
-//    (after) there are 624768 items in the hash
-//    hash key='000052', value(count)='1'
-//    hash key='000056', value(count)='2'
-//    hash key='000058', value(count)='3'
-//    hash key='000060', value(count)='2'
-//    hash key='000063', value(count)='2'
-//    hash key='000064', value(count)='3'
-//    hash key='000065', value(count)='3'
-//    hash key='000069', value(count)='1'
-//    hash key='000070', value(count)='2'
-//    hash key='000071', value(count)='1'
-//    hash key='000074', value(count)='3'
-//    hash key='000076', value(count)='2'
-//    hash key='000077', value(count)='2'
-//    hash key='000080', value(count)='3'
-//    hash key='000089', value(count)='2'
-//    hash key='000090', value(count)='3'
-//    hash key='000094', value(count)='3'
-//    hash key='000100', value(count)='5'
-//    hash key='000050', value(count)='45'
-//    hash key='000072', value(count)='1'
-//    hash key='000078', value(count)='2'
-//    hash key='000084', value(count)='2'
-//    hash key='000102', value(count)='2'
-//    hash key='000106', value(count)='3'
-//    hash key='000059', value(count)='1'
-//    hash key='000098', value(count)='2'
-//    hash key='000107', value(count)='3'
-//    hash key='000110', value(count)='8'
-//    hash key='000116', value(count)='4'
-//    found 666343 matches, 41575 unique items
+//		C:\code>main.exe data_large.txt
+//		(before) there are 0 items in the hash
+//		(after) there are 322909 items in the hash
+//		hash key='000056', value(count)='1'
+//		hash key='000060', value(count)='2'
+//		hash key='000068', value(count)='3'
+//		hash key='000080', value(count)='2'
+//		hash key='000084', value(count)='1'
+//		hash key='000086', value(count)='1'
+//		hash key='000090', value(count)='2'
+//		hash key='000092', value(count)='2'
+//		hash key='000096', value(count)='2'
+//		hash key='000098', value(count)='4'
+//		hash key='000100', value(count)='1'
+//		hash key='000052', value(count)='1'
+//		hash key='000104', value(count)='3'
+//		hash key='000108', value(count)='1'
+//		hash key='000110', value(count)='3'
+//		hash key='000074', value(count)='1'
+//		hash key='000106', value(count)='2'
+//		hash key='000114', value(count)='1'
+//		hash key='000065', value(count)='1'
+//		hash key='000075', value(count)='1'
+//		hash key='000085', value(count)='1'
+//		hash key='000105', value(count)='1'
+//		hash key='000115', value(count)='2'
+//		hash key='000125', value(count)='1'
+//		hash key='000145', value(count)='2'
+//		hash key='000152', value(count)='2'
+//		hash key='000050', value(count)='21'
+//		hash key='000120', value(count)='1'
+//		hash key='000134', value(count)='2'
+//		hash key='000162', value(count)='2'
+//		found 333897 matches, 10988 unique items
 //
 // Ben Burns
-// July 09, 2013
+// July 10, 2013
 
 #include <stdio.h>
 #include "uthash.h"
@@ -110,6 +110,14 @@ typedef struct HASH_OBJECT
 
 // declare hash table
 HASH_OBJECT *head = NULL;    /* important! initialize to NULL */
+
+// well, this will work for ascii. Hopefully there's no unicode or anything ...
+int isnumeric(unsigned char c)
+{
+	if (c < '0') 
+		return 0;
+	return !(c > '9');
+}
 
 // Will search the hash table for a given key.
 // If the hash object is found, the counter of the associated object
@@ -146,7 +154,7 @@ int main(int argc, char **argv)
     
     char current_key[MAX_KEY_NAME_LEN];
     long matches_found = 0;
-    
+
     long i = 0;         // loop var
     HASH_OBJECT *s;    // loop var
 
@@ -164,14 +172,15 @@ int main(int argc, char **argv)
         return 0;
     }
     
+	memset(current_key, 0, 10);
     printf("(before) there are %d items in the hash\n", HASH_COUNT(head));
     
     do
     {
         // next character
         c = fgetc(handle);
-        
-        /* 2013-06-12:10:22:07.000;S;000050.edu.legume.leg3 */
+
+
         switch (c)
         {
             // looking for the string ";S;"
@@ -183,44 +192,50 @@ int main(int argc, char **argv)
                 else if (state == 2) /* second semicolon */
                 {
                     state++;
-                    matches_found++;
                 }
+				else
+					state = 0;
             break;
+			
             case 'S':
                 if (state == 1) /* after semicolon is an 'S' */
                 {
                     state++;
                 }
+				else
+					state = 0;
             break;
-            case '.':
-                
-  			if (state == 3)
-				{
-					// insert key into hash table/increment
-					increment_count(current_key);
-				}
-                
-                // reset state machine
-                state = 0;
-                job_id_name_index = 0;
-                memset(current_key, 0, 10);
-                
-                break;
-            
+			
             default:
-                // found ";S;" start saving the name field, one character at a time
+			
+				// found ";S;" start saving the name field, one character at a time
                 if (state == 3)
                 {
-                    // safety check ...
-                    if (job_id_name_index < MAX_KEY_NAME_LEN)
-                    {
-                        current_key[job_id_name_index] = c;
-                        job_id_name_index++;
-                    }
+					if (isnumeric(c))
+					{
+						// safety check ...
+						if (job_id_name_index < MAX_KEY_NAME_LEN)
+						{
+							current_key[job_id_name_index] = c;
+							job_id_name_index++;
+						}
+					}
+					else
+						state = 0;
                 }
-                // otherwise, reset state machine
-                else if (state != 3)
+			
+                // otherwise, reset state machine.
+				// state can change above.
+                if (state != 3)
                 {
+					// check to see if the latest key has been inserted
+					// or it's still reset since last time.
+					if (current_key[0] != 0)
+					{
+						matches_found++;
+						increment_count(current_key);
+					}
+				
                     state = 0;
                     job_id_name_index = 0;
                     memset(current_key, 0, 10);
