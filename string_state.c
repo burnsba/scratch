@@ -234,11 +234,17 @@ int main(int argc, char **argv)
                     {
                         matches_found++;
                         increment_count(current_key);
+  					
+						state = 0;
+                        job_id_name_index = 0;
+                        memset(current_key, 0, 10);
                     }
-                
-                    state = 0;
-                    job_id_name_index = 0;
-                    memset(current_key, 0, 10);
+                    else 
+					{
+                        state = 0;
+                        job_id_name_index = 0;
+                        memset(current_key, 0, 10);
+					}
                 }
         }
     }
