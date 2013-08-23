@@ -1,0 +1,375 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<!--
+
+// Copyright 2013 Benjamin Burns
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+purpose:
+    test your math skills by doing some addition and subtraction 
+    with common weights found in the gym
+
+-->
+<style>
+*
+{
+    font-family: monospace;
+}
+#weights-used
+{
+    padding: 1em;
+    margin: 1em;
+    border: 1px solid #000000;
+}
+
+#weights-used-display
+{
+    padding: 2em;
+    margin: 2em;
+    border: 1px dashed #999999;
+}
+#playing-field, #start-stop
+{
+    text-align: center;
+}
+#answer-textbox
+{
+    margin-left:auto;
+    margin-right:auto;
+}
+#question
+{
+    padding: 2em;
+    margin: 2em;
+    border: 1px dashed #9999ff;
+    width: 400px;
+    height: 100px;
+    font-size: 28px;
+    margin-left:auto;
+    margin-right:auto;
+}
+.weight
+{
+    display: inline-block;
+    border: 1px solid black;
+    background-color: black;
+    vertical-align: bottom;
+    margin: 1em;
+}
+/*
+http://forum.bodybuilding.com/showthread.php?t=7482681&page=1
+45: 17"
+35: 14"
+25: 11.5"
+10: 9.5"
+5: 8"
+2.5: 6.25"
+*/
+/* let one inch equal 4px */
+.weight-45-plate
+{
+    width: 12px;
+    height: 68px;
+}
+.weight-35-plate
+{
+    width: 10px;
+    height: 56px;
+}
+.weight-25-plate
+{
+    width: 8px;
+    height: 46px;
+}
+.weight-10-plate
+{
+    width: 6px;
+    height: 38px;
+}
+.weight-5-plate
+{
+    width: 4px;
+    height: 32px;
+}
+.weight-2-5-plate
+{
+    width: 2px;
+    height: 25px;
+}
+</style>
+<script>
+var SupportedWeightValues = [45, 35, 25, 10, 5, 2.5];
+var BarbellWeight = 45;
+var Units = "pounds";
+var UsedWeights = [];
+
+var MaxQuestions = 20;
+var CurrentQuestionsMissed = 0;
+var CurrentQuestionsCorrect = 0;
+var CurrentQuestionNumber = 0;
+var CurrentlyRunning = false;
+var StarTime = 0;
+var EndTime = 0;
+var Statistics = [
+    /*
+    {
+        numberQuestions: 0,
+        questionsMissed: 0,
+        runTime: 0,
+    }
+    */
+];
+
+function addWeight()
+{
+    var tb = document.getElementById("add-weight-textbox");
+    var text = tb.value;
+    
+    parseAddWeight(text);
+}
+
+function parseAddWeight(text)
+{
+    var num = 0;
+    if (parseFloat(text) == parseInt(text))
+        num = parseInt(text);
+    else
+        num = parseFloat(text);
+    
+    if (SupportedWeightValues.indexOf(num) == -1)
+    {
+        alert("Value not supported: " + text);
+        return;
+    }
+    
+    var newNode = document.createElement("div");
+    newNode.setAttribute("class", "weight " + numberToCssClass(text));
+    newNode.innerHTML = "&nbsp;";
+    
+    document.getElementById("weights-used-display").appendChild(newNode);
+    
+    UsedWeights.push(num);
+    refreshUsedWeightsText();
+}
+
+function refreshUsedWeightsText()
+{
+    UsedWeights.sort();
+
+    var counts = {};
+    var uniqueValues = [];
+    for (var i=0; i<UsedWeights.length; i++)
+    {
+        if (counts[UsedWeights[i]] == undefined)
+        {
+            counts[UsedWeights[i]] = new Object();
+            counts[UsedWeights[i]].count = 1;
+            counts[UsedWeights[i]].name = UsedWeights[i];
+        }
+        else
+            counts[UsedWeights[i]].count = counts[UsedWeights[i]].count + 1;
+            
+        if (uniqueValues.indexOf(UsedWeights[i]) == -1)
+            uniqueValues.push(UsedWeights[i]);
+    }
+    
+    uniqueValues.sort(function(a,b){return a-b;});
+    
+    var textArr = [];
+    for (var i=0; i<uniqueValues.length; i++)
+    {
+        textArr.push(counts[uniqueValues[i]].name + "x" + counts[uniqueValues[i]].count);
+    }
+    
+    textArr.reverse();
+    
+    document.getElementById("weights-used-text").innerText = textArr.join(", ");
+}
+
+function numberToCssClass(weight)
+{
+    var text = "";
+    // do some sanitation, drop trailing zeroes and things
+    if (parseFloat(weight) == parseInt(weight))
+        text = parseInt(weight);
+    else
+        text = (parseFloat(weight) + "").replace(".", "-");
+    return ("weight-" + text + "-plate");
+}
+
+function setBarbellWeight()
+{
+    var tb = document.getElementById("set-barbell-weight-textbox");
+    var text = tb.value;
+    
+    if (isNaN(text))
+    {
+        alert("Value is not numeric: " + text);
+        return;
+    }
+    
+    if (text < 0)
+    {
+        alert("Can not enter a negative number: " + text);
+        return;
+    }
+    
+    BarbellWeight = text;
+    refreshBarbellWeightText();
+}
+
+function onPageLoad()
+{
+    var s = document.getElementById("supported-weight-values");
+    var text = SupportedWeightValues.join(", ");
+    s.innerHTML = text;
+    
+    refreshBarbellWeightText();
+    
+    parseAddWeight(45);
+    parseAddWeight(45);
+    parseAddWeight(35);
+    parseAddWeight(35);
+    parseAddWeight(25);
+    parseAddWeight(25);
+    parseAddWeight(10);
+    parseAddWeight(10);
+    parseAddWeight(10);
+    parseAddWeight(10);
+    parseAddWeight(5);
+    parseAddWeight(5);
+    parseAddWeight(5);
+    parseAddWeight(5);
+    parseAddWeight(2.5);
+    parseAddWeight(2.5);
+}
+
+function refreshBarbellWeightText()
+{
+    s = document.getElementById("barbell-weight");
+    s.innerHTML = BarbellWeight + " " + Units;
+}
+
+function addWeightTextBoxKey(e)
+{
+    // look for window.event in case event isn't passed in
+    if (typeof e == 'undefined' && window.event) 
+    { 
+        e = window.event; 
+    }
+    if (e.keyCode == 13)
+    {
+        addWeight();
+        document.getElementById("add-weight-textbox").value = "";
+    }
+}
+
+function setBarbellWeightKey(e)
+{
+    // look for window.event in case event isn't passed in
+    if (typeof e == 'undefined' && window.event) 
+    { 
+        e = window.event; 
+    }
+    if (e.keyCode == 13)
+    {
+        setBarbellWeight();
+        document.getElementById("set-barbell-weight-textbox").value = "";
+    }
+}
+
+function submitAnswerKey(e)
+{
+    // look for window.event in case event isn't passed in
+    if (typeof e == 'undefined' && window.event) 
+    { 
+        e = window.event; 
+    }
+    if (e.keyCode == 13)
+    {
+        submitAnswer();
+        document.getElementById("answer-textbox").value = "";
+    }
+}
+
+function submitAnswer()
+{
+    CurrentQuestionNumber = CurrentQuestionNumber + 1;
+    if (CurrentQuestionNumber == MaxQuestions)
+        endRound();
+}
+
+function pressStartStop()
+{
+    // time to start
+    if (CurrentlyRunning == false)
+    {
+        CurrentlyRunning = true;
+        document.getElementById("start-stop").innerText = "Stop";
+        document.getElementById("answer-textbox").disabled = false;
+    }
+    // time to stop
+    else
+    {
+        CurrentlyRunning = false;
+        document.getElementById("start-stop").innerText = "Start";
+        document.getElementById("answer-textbox").disabled = true;
+    }
+}
+
+function startRound()
+{
+    var MaxQuestions = 20;
+    CurrentQuestionsMissed = 0;
+    CurrentQuestionsCorrect = 0;
+    CurrentQuestionNumber = 1;
+    StarTime = Date.now();
+}
+
+function endRound()
+{
+    EndTime = Date.now();
+}
+</script>
+</head>
+<body onLoad="onPageLoad()">
+
+<div id="weights-used">
+    <span>Weights used</span>
+    <div id="weights-used-display"></div>
+    <div id="weights-used-text"></div>
+</div>
+
+<button id="add-weight" onclick="addWeight()">Add</button>
+<input type="textbox" id="add-weight-textbox" onkeypress="addWeightTextBoxKey(event)"></input>
+<span>supported values are: <span id="supported-weight-values"></span></span>
+
+<p>
+
+<button id="set-barbell-weight" onclick="setBarbellWeight()">Set barbell weight</button>
+<input type="textbox" id="set-barbell-weight-textbox" onkeypress="setBarbellWeightKey(event)"></input>
+<span>currently: <span id="barbell-weight"></span></span>
+
+<hr>
+<p><br><p><br>
+
+<div id="playing-field">
+    <button id="start-stop" onclick="pressStartStop()">Start</button>
+    <div id="question">a a</div>
+    <input type="textbox" id="answer-textbox" onkeypress="submitAnswerKey(event)" disabled="disabled"></input>
+</div>
+
+</body>
+</html>
