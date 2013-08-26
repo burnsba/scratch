@@ -68,6 +68,14 @@ purpose:
     vertical-align: bottom;
     margin: 1em;
 }
+.question-plate 
+{
+	/* need special positioning for these */
+	padding: 0px;
+	margin: 0px;
+	float: left; 
+	position: relative;
+}
 /*
 http://forum.bodybuilding.com/showthread.php?t=7482681&page=1
 45: 17"
@@ -78,6 +86,11 @@ http://forum.bodybuilding.com/showthread.php?t=7482681&page=1
 2.5: 6.25"
 */
 /* let one inch equal 4px */
+.weight-barbell
+{
+	width: 344px;
+	height: 8px;
+}
 .weight-45-plate
 {
     width: 12px;
@@ -110,10 +123,48 @@ http://forum.bodybuilding.com/showthread.php?t=7482681&page=1
 }
 </style>
 <script>
+// weights for plates
 var SupportedWeightValues = [45, 35, 25, 10, 5, 2.5];
+// in pixels
+var SupportedPlateDimensions = {
+	45 : {
+		Width: 12,
+		Height: 68 
+	},
+	35 : {
+		Width: 10,
+		Height: 56
+	},
+	25 : {
+		Width: 8,
+		Height: 46
+	},
+	10 : {
+		Width: 6,
+		Height: 38
+	},
+	5 : {
+		Width: 4,
+		Height: 32
+	},
+	2.5 : {
+		Width: 2,
+		Height: 25
+	}
+};
+// weight of barbell
 var BarbellWeight = 45;
+var BarbellWidth = 344;
+// weight measurement
 var Units = "pounds";
+// Array of weights as single entries
 var UsedWeights = [];
+// Array of weights, organized by SupportedWeightValues, contains number of pairs
+var UsablePairs = [];
+// weights used for the current question
+var QuestionValues = [];
+// what do the current weights sum to?
+var QuestionKey = 0;
 
 var MaxQuestions = 20;
 var CurrentQuestionsMissed = 0;
@@ -154,7 +205,7 @@ function parseAddWeight(text)
         return;
     }
     
-    var newNode = document.createElement("div");
+	var newNode = document.createElement("div");
     newNode.setAttribute("class", "weight " + numberToCssClass(text));
     newNode.innerHTML = "&nbsp;";
     
@@ -162,6 +213,39 @@ function parseAddWeight(text)
     
     UsedWeights.push(num);
     refreshUsedWeightsText();
+	
+	updateUsablePairs();
+}
+
+function updateUsablePairs()
+{
+	 var counts;
+	 
+	 // empty array
+	 for (var i=0; i<SupportedWeightValues.length; i++)
+	 {
+		UsablePairs[SupportedWeightValues[i]] = 0;
+	 }
+	 // iterate over UsedWeights, according to SupportedWeightValues and count
+	 for (var i=0; i<UsedWeights.length; i++)
+	 {
+		// if the index exists, increment
+		if (UsablePairs[UsedWeights[i]] != undefined)
+			UsablePairs[UsedWeights[i]] = UsablePairs[UsedWeights[i]] + 1;
+	 }
+	 // chop to next lowest even integer
+	 for (var i in UsablePairs)
+	 {
+		if (UsablePairs[i] > 0 && UsablePairs[i] != undefined)
+		{
+			if (UsablePairs[i] & 0x01)
+				UsablePairs[i] = (UsablePairs[i] - 1) / 2;
+			else
+				UsablePairs[i] = UsablePairs[i] / 2;
+		}
+		else
+			UsablePairs[i] = undefined;
+	 }
 }
 
 function refreshUsedWeightsText()
@@ -196,6 +280,79 @@ function refreshUsedWeightsText()
     textArr.reverse();
     
     document.getElementById("weights-used-text").innerText = textArr.join(", ");
+}
+
+function refreshQuestionWeightsText()
+{
+    var textArr = [];
+	for (var i=0; i<SupportedWeightValues.length; i++)
+	{
+		if (QuestionValues[SupportedWeightValues[i]] > 0)
+			textArr.push(SupportedWeightValues[i] + "x" + (QuestionValues[SupportedWeightValues[i]] * 2));
+	}
+	document.getElementById("question-weights-text").innerText = textArr.join(", ");
+}
+
+function refreshQuestionWeightsImage()
+{
+	// remove previous values
+	document.getElementById("question-weights-display").innerHTML = "";
+	
+	var newNode = document.createElement("div");
+    newNode.setAttribute("class", "weight weight-barbell");
+	newNode.setAttribute("id", "question-barbell");
+    newNode.innerHTML = "&nbsp;";
+    
+    document.getElementById("question-weights-display").appendChild(newNode);
+	
+	var lastWidth = 0;
+	var leftPosition = (BarbellWidth/3) + 75;
+	var rightPosition = (BarbellWidth/3) + 125;
+	
+	for(var i=0; i<SupportedWeightValues.length; i++)
+	{
+		if (QuestionValues[SupportedWeightValues[i]] <= 0)
+			continue;
+		
+		for (var j=0; j< QuestionValues[SupportedWeightValues[i]]; j++)
+		{
+			var width = SupportedPlateDimensions[SupportedWeightValues[i]].Width;
+			if (isNaN(width) || width <= 0)
+				width = 4;
+			
+			
+			leftPosition = leftPosition - lastWidth*3 - width*2;// - width - lastWidth;
+			rightPosition -= width;
+			
+			lastWidth = width;
+			
+			var height = SupportedPlateDimensions[SupportedWeightValues[i]].Height / 2;
+			if (isNaN(height) || height <= 0)
+				height = 30;
+		
+			leftPosition = parseInt(leftPosition);
+			rightPosition = parseInt(rightPosition);
+		
+			// left side
+			newNode = document.createElement("div");
+			newNode.setAttribute("class", "weight question-plate " + numberToCssClass(SupportedWeightValues[i]));
+			newNode.setAttribute("style", "left: " + leftPosition + "px;top: -" + (35 + height) +"px");
+			newNode.innerHTML = "&nbsp;";
+			
+			document.getElementById("question-weights-display").appendChild(newNode);
+			
+			// right side
+			newNode = document.createElement("div");
+			newNode.setAttribute("class", "weight question-plate " + numberToCssClass(SupportedWeightValues[i]));
+			newNode.setAttribute("style", "left: " + rightPosition + "px;top: -" + (35 + height) +"px");
+			newNode.innerHTML = "&nbsp;";
+			
+			document.getElementById("question-weights-display").appendChild(newNode);
+		}
+		
+	}
+	
+	
 }
 
 function numberToCssClass(weight)
@@ -306,9 +463,45 @@ function submitAnswerKey(e)
 
 function submitAnswer()
 {
-    CurrentQuestionNumber = CurrentQuestionNumber + 1;
-    if (CurrentQuestionNumber == MaxQuestions)
-        endRound();
+	if (QuestionKey == parseFloat(document.getElementById("answer-textbox").value))
+	{
+		generateNextQuestion();
+		
+		CurrentQuestionNumber = CurrentQuestionNumber + 1;
+		if (CurrentQuestionNumber == MaxQuestions)
+			endRound();
+	}
+}
+
+function generateNextQuestion()
+{
+	QuestionKey = 0;
+	
+	for (var i=0; i<SupportedWeightValues.length; i++)
+	{
+		QuestionValues[SupportedWeightValues[i]] = 0;
+	}
+	
+	for (var i=0; i<SupportedWeightValues.length; i++)
+	{
+		// use these weights?
+		if (parseInt(Math.random() + 0.9) == 1 && UsablePairs[SupportedWeightValues[i]] > 0)
+		{
+			// how many weights to use? (between one and number of pairs)
+			QuestionValues[SupportedWeightValues[i]] = Math.floor((Math.random() * UsablePairs[SupportedWeightValues[i]]) + 1)
+		}
+	 }
+
+	for (var i=0; i<SupportedWeightValues.length; i++)
+	{
+		// don't forget, it's pairs
+		QuestionKey += SupportedWeightValues[i] * QuestionValues[SupportedWeightValues[i]] * 2;
+	}
+	
+	QuestionKey += BarbellWeight;
+	
+	refreshQuestionWeightsImage();
+	refreshQuestionWeightsText();
 }
 
 function pressStartStop()
@@ -319,6 +512,8 @@ function pressStartStop()
         CurrentlyRunning = true;
         document.getElementById("start-stop").innerText = "Stop";
         document.getElementById("answer-textbox").disabled = false;
+		
+		startRound();
     }
     // time to stop
     else
@@ -336,6 +531,8 @@ function startRound()
     CurrentQuestionsCorrect = 0;
     CurrentQuestionNumber = 1;
     StarTime = Date.now();
+	
+	generateNextQuestion();
 }
 
 function endRound()
@@ -367,7 +564,10 @@ function endRound()
 
 <div id="playing-field">
     <button id="start-stop" onclick="pressStartStop()">Start</button>
-    <div id="question">a a</div>
+    <div id="question">
+		<div id="question-weights-display"></div>
+		<span id="question-weights-text"></span>
+	</div>
     <input type="textbox" id="answer-textbox" onkeypress="submitAnswerKey(event)" disabled="disabled"></input>
 </div>
 
