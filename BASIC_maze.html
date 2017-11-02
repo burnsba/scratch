@@ -29,14 +29,17 @@ p {
     font-family: monospace;
     background: #000099;
     color: #999999;
+    // 46 characters long
     width: 600px;
     word-wrap: break-word;
+    // no spacing between lines
+    line-height: 1;
 }
 </style>
 <script>
-var timerprint;
-
+var timerprint,count;
 function load() {
+    count = 0;
     clearInterval(timerprint);
     timerprint=setInterval(function(){make_maze()},5);
 }
@@ -45,6 +48,9 @@ function make_maze() {
     // characters for '/' and '\', plus a random between 0 and 1, will truncate to integer
     a+=String.fromCharCode(9585.5+Math.random());
     document.getElementById('textb').innerHTML=a;
+    // 44 characters tall
+    if (count++ > 2022)
+        clearInterval(timerprint);
 }
 </script>
 
