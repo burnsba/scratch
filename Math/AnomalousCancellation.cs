@@ -109,3 +109,222 @@ for (int num = min; num <= max; num++)
 }
 
 Console.WriteLine($"TotalCount: {totalCount}");
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Update
+// 
+// This will consider any substring as a factor. For example "1234" will have factors {1, 2, 3, 4, 12, 23, 34, 123, 234}.
+// 
+// However, I think this is not enough, which is why this count is still wrong. From the mathworld page,
+// there is 1019 / 5095 = 11 / 55 which I can not consider at all. 
+
+public void CountAnomalousCancellation(int min, int max)
+{
+    int totalCount = 0;
+
+    for (int num = min; num <= max; num++)
+    {
+        var numDivisors = GetDivisors(num);
+        
+        if (numDivisors.Contains(2) && numDivisors.Contains(5))
+        {
+            continue;
+        }
+        
+        for (int den = num + 1; den < max; den++)
+        {
+            var numString = num.ToString();
+            var denString = den.ToString();
+                       
+            foreach (var factor in ProperSubstrings(denString))
+            {
+                var f = int.Parse(factor);
+                
+                if (f == 0 || f % 10 == 0)
+                {
+                    continue;
+                }
+                
+                var denDivisors = GetDivisors(den);
+                
+                if (numDivisors.Contains(f) || denDivisors.Contains(f))
+                {
+                    continue;
+                }
+                
+                if (denDivisors.Contains(2) && denDivisors.Contains(5))
+                {
+                    continue;
+                }
+                
+                // If there's nothing to factor.
+                if (!numString.Contains(factor))
+                {
+                    continue;
+                }
+                
+                var newNumString = numString.ReplaceFirst(factor, String.Empty);
+                var newDenString = denString.ReplaceFirst(factor, String.Empty);
+                
+                // If the factor appears multiple times.
+                if (newNumString.Contains(factor) || newDenString.Contains(factor))
+                {
+                    continue;
+                }
+                
+                if (string.IsNullOrWhiteSpace(newNumString) || string.IsNullOrWhiteSpace(newDenString))
+                {
+                    continue;
+                }
+                
+                var newNum = int.Parse(newNumString);
+                var newDen = int.Parse(newDenString);
+                
+                // If the result got factored to nothing.
+                if (newNum == 0 || newDen == 0)
+                {
+                    continue;
+                }
+                
+                var lhs = num * newDen;
+                var rhs = newNum * den;
+                
+                if (lhs == rhs)
+                {
+                    Console.WriteLine($"Cancel {factor}: {num} / {den} == {newNum} / {newDen}");
+                    totalCount++;
+                }
+            }
+        }
+    }
+
+    Console.WriteLine($"TotalCount: {totalCount}");
+}
+
+public IEnumerable<string> ProperSubstrings(string input)
+{
+    var ret = new List<string>();
+    
+    if (string.IsNullOrWhiteSpace(input))
+    {
+        yield break;
+    }
+    
+    int len = input.Length;
+    int maxLength = len - 1;
+    
+    if (maxLength < 1)
+    {
+        yield break;
+    }
+    
+    int position = 0;
+    int currentLength = 1; 
+    
+    while (true)
+    {
+        yield return input.Substring(position, currentLength);
+        
+        position++;
+        
+        if (position + currentLength > len)
+        {
+            position = 0;
+            currentLength++;
+        }
+        
+        if (currentLength > maxLength)
+        {
+            break;
+        }
+    }
+}
+
+public static string ReplaceFirst(this string text, string search, string replace)
+{
+    int pos = text.IndexOf(search);
+    if (pos < 0)
+    {
+        return text;
+    }
+    
+    return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+}
+
+public static HashSet<int> Primes = new HashSet<int>();
+public static List<int> PrimesList = new List<int>();
+public static Dictionary<int, List<int>> DivisorsCash = new Dictionary<int, List<int>>();
+
+public static void BuildPrimes()
+{
+    Primes.Clear();
+    PrimesList.Clear();
+    
+    var max = 10000;
+    var maxs = 100;
+    
+    var arr = Enumerable.Range(0, max).ToArray();
+    arr[1] = 0;
+    
+    for (int i = 2; i < maxs; i++)
+    {
+        for (int j = i + i; j < max; j += i)
+        {
+            arr[j] = 0;
+        }
+    }
+    
+    foreach (var x in arr)
+    {
+        if (x > 0)
+        {
+            Primes.Add(x);
+        }
+    }
+    
+    PrimesList = Primes.ToList();
+}
+
+public static List<int> GetDivisors(int input)
+{
+    if (Primes.Count < 1)
+    {
+        BuildPrimes();
+    }
+    
+    List<int> ret = null;
+    
+    if (!DivisorsCash.TryGetValue(input, out ret))
+    {
+        ret = new List<int>();
+    }
+    else
+    {
+        return ret;
+    }
+    
+    if (Primes.Contains(input))
+    {
+        ret.Add(input);
+        DivisorsCash[input] = ret;
+        return ret;
+    }
+    
+    var potentialDivisors = PrimesList.Where(x => x < input);
+    
+    foreach (var d in potentialDivisors)
+    {
+        int i;
+        Math.DivRem(input, d, out i);
+        
+        if (i == 0)
+        {
+            ret.Add(d);
+        }
+    }
+    
+    DivisorsCash[input] = ret;
+    return ret;
+}
